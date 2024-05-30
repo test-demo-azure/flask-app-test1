@@ -1,0 +1,26 @@
+stages:
+  - production_build
+  - production_deploy
+
+#production_build:
+#  stage: production_build
+#  script:
+#    - echo "Building New Image"
+#    - docker --version
+#    - docker build -t flaskapp .
+
+production_build:
+  stage: production_build
+  script:
+    - echo "Updating Old Image"
+    - docker exec flaskapp sh -c "git pull http://manikanta:glpat-yKKsdUwHEZdWfDunFZqJ@10.21.34.119/manikanta/flask-app.git"
+    - docker commit flaskapp flaskapp
+
+production_deploy:
+  stage: production_deploy
+  script:
+    - echo "Stoping Old Server..."
+    - docker stop flaskapp && docker rm flaskapp
+    - echo "Deploying Docker container..."
+    - docker run --name flaskapp -p 5000:5000 --restart=always -d flaskapp
+    - docker ps
